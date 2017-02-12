@@ -10,6 +10,7 @@
 ####################################################################
 
 #DATENOW="`date`"
+# Version 2.0
 # Serial 2014112902
 
 # Include custom parameters for this script
