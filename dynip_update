@@ -1,0 +1,38 @@
+#!/bin/bash 
+
+# Script for InternetBS.net
+
+# Under NAT version (no wanif required)
+
+username="USERNAME"
+pass="PW"
+dynhostname="HOST.DYNPROVIDER.123"
+#wanif="wan"
+
+emailnotification="ME@MAIL.COM"
+
+#================================
+result=""
+
+get_ext_ip () { 
+dig +short myip.opendns.com @resolver1.opendns.com
+#ifconfig $wanif | grep "inet addr" | sed 's/^.*inet addr:\([0-9\.]*\)  Bcast.*$/\1/'
+}
+
+notify () {
+echo "$1 - at `date "+%H:%M %d/%m/%Y"`"
+echo -e "Subject:$1\n" | sendmail $emailnotification
+}
+
+extip=$(get_ext_ip)
+
+result=$(curl -k -u "$username:$pass" "https://dyndns.topdns.com/update?hostname=$dynhostname&myip=$extip")
+
+if [[ `echo "$result" | grep -c "good"` -ne 0 ]]
+	then notify "New IP $extip has been set for $dynhostname"
+elif [[ `echo "$result" | grep -c "nochg"` -ne 0 ]]
+	then echo "No changes have been made"
+else notify "ERROR! Unable to set new IP $extip for $dynhostname. Please investigate further"
+fi
+
+
