@@ -1,38 +1,68 @@
 #!/bin/bash 
+####################################################################
+####################################################################
+# Scripts that updates dynamic DNS servers using HTTPS via CURL.
+# Curl is a required package. Please make sure it's installed!
+# Currently supports Internet.bs and NO-IP.com providers.
+# Custom parameters are set in /etc/dynip_update.conf - PLESE UPDATE
+# THAT FILE - DO NOT CHANGE THIS SCRIPT.
+####################################################################
+####################################################################
+DATENOW="`date`"
+# Serial 2014110601
 
-# Script for InternetBS.net
+# Include custom parameters for this script
+source /etc/dynip_update.conf
 
-# Under NAT version (no wanif required)
 
-username="USERNAME"
-pass="PW"
-dynhostname="HOST.DYNPROVIDER.123"
-#wanif="wan"
+get_ext_ip () {
+# Get external IP even if under NAT
+#$DIG +short myip.opendns.com @resolver1.opendns.com &
+curl -s curlmyip.com &
+wait ${!}
+}
 
-emailnotification="ME@MAIL.COM"
-
-#================================
-result=""
-
-get_ext_ip () { 
-dig +short myip.opendns.com @resolver1.opendns.com
-#ifconfig $wanif | grep "inet addr" | sed 's/^.*inet addr:\([0-9\.]*\)  Bcast.*$/\1/'
+is_ip () {
+# Regex to validate IP
+echo $1 | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'
 }
 
 notify () {
-echo "$1 - at `date "+%H:%M %d/%m/%Y"`"
-echo -e "Subject:$1\n" | sendmail $emailnotification
+if [ $EMAILNOTIFICATION -eq 1 ]
+   then
+	echo -e "Subject:$1\n" | $SENDMAIL $EMAIL
+   else
+	echo -e "$1\n"
+fi
 }
 
-extip=$(get_ext_ip)
+update_ip () {
+RESULT=$(curl -s -k -u "$USERNAME:$PASS" "$DYNIPPROV?hostname=$DYNHOSTNAME&myip=$CURR_IP")
+if [[ `echo "$RESULT" | grep -c "good"` -ne 1 ]]
+   then 
+	notify "[WARNING] DNS update result from `hostname` for $DYNHOSTNAME is $RESULT. Investigation needed."
+	exit 1
+fi
+}
 
-result=$(curl -k -u "$username:$pass" "https://dyndns.topdns.com/update?hostname=$dynhostname&myip=$extip")
+store_ip () {
+echo "$CURR_IP" > $P_IP
+}
 
-if [[ `echo "$result" | grep -c "good"` -ne 0 ]]
-	then notify "New IP $extip has been set for $dynhostname"
-elif [[ `echo "$result" | grep -c "nochg"` -ne 0 ]]
-	then echo "No changes have been made"
-else notify "ERROR! Unable to set new IP $extip for $dynhostname. Please investigate further"
+####################################################################
+CURR_IP="$(is_ip "$(get_ext_ip)")"
+P_IP=/etc/p_ip.txt
+PREV_IP="`cat $P_IP`"
+
+if [ -z "$CURR_IP" ]
+   then notify "Unable to get current IP for `hostname` - $DYNHOSTNAME -> Aborting" ; exit 1
+fi
+
+if ! [ -f $P_IP ] || [ "$CURR_IP" != "$PREV_IP" ] 
+   then 
+	store_ip
+	update_ip
+	notify "New IP $EXTIP set for $DYNHOSTNAME - at `date "+%H:%M %d/%m/%Y"` from `hostname`"
 fi
 
 
