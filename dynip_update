@@ -10,29 +10,26 @@
 ####################################################################
 
 #DATENOW="`date`"
-# Serial 2014110903
+# Serial 2014112902
 
 # Include custom parameters for this script
 source /etc/dynip_update.conf
 
-# IP files
+# Previous IP file (needs to be stored in a directory that doesn't
+# get deleted in case of reboot).
 ME=`basename $0`
-P_IP=/var/run/${ME}_p_ip.txt
-C_IP=/dev/shm/${ME}_c_ip.txt
+P_IP=/root/${ME}_p_ip.txt
 
 
 ####################################################################
 
 get_ip () {
-# reset content of C_IP
-echo "" > $C_IP
 # curl randomly one of the services and check that the output is actually an IP
 # store this into CURR_IP variable and increment TRIES counter variable
 declare -a SERVICES=("ipecho.net/plain" "ident.me" "tnx.nl/ip" "ip.appspot.com" "curlmyip.com")
 SRV=${SERVICES[$((  RANDOM % ${#SERVICES[@]}  ))]}
-$CURL -s --retry 3 --retry-delay 5 -m 15 $SRV > $C_IP
+CURR_IP="`$CURL -s --retry 3 --retry-delay 5 -m 15 $SRV | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'`"
 (( TRIES++ ))
-CURR_IP="`cat $C_IP | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'`"
 }
 
 check_ip () {
@@ -58,7 +55,8 @@ fi
 
 is_update_required () {
 # In case of IP mismatch between current and previous, update and notify
-if [ "$CURR_IP" != "`cat $P_IP`" ] 
+PREV_IP=`cat $P_IP`
+if [ "$CURR_IP" != "$PREV_IP" ] 
    then 
 	store_ip
 	update_ip
@@ -68,13 +66,13 @@ fi
 
 notify () {
 # If email notification is set to 1 (enabled) notify via mail and log
-# Otherwiser just print on screen and log
+# Otherwiser just log (print on screen for debugging)
 if [ $EMAILNOTIFICATION -eq 1 ]
    then
 	echo -e "Subject:$1\n" | $SENDMAIL $EMAIL
 	logger "${BASH_SOURCE[0]} PID $$ - $1"
    else
-	echo -e "$1\n"
+	#echo -e "$1\n"  # Enable for debugging
 	logger "${BASH_SOURCE[0]} PID $$ - $1"
 fi
 }
