@@ -1,6 +1,6 @@
 # README #
 
-Here a script that Iâ€™ve created to update your Dynamic DNS service.
+Here a script that I’ve created to update your Dynamic DNS service.
 You can run it manually or put in cron to run every few minutes.
 It sends the update ONLY if the IP has changed. So you will avoid any "abuse" error, in case of too many attempts to update the IP.
 
@@ -23,9 +23,9 @@ This is composed by 2 files:
 ### How do I get set up? ###
 
 * Installation:
-  1. `sudo cp dynip_update.conf.example /etc/dynip_update.conf`
-  2. Modify `/etc/dynip_update.conf` accordingly with your parameters
-  3. `sudo cp dynip_update /usr/local/bin/dynip_update`
+  *1. `sudo cp dynip_update.conf.example /etc/dynip_update.conf`
+  *2. Modify `/etc/dynip_update.conf` accordingly with your parameters
+  *3. `sudo cp dynip_update /usr/local/bin/dynip_update`
 * Dependencies: *curl, dig, sendmail*
 
 
