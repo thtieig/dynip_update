@@ -10,19 +10,22 @@ It requires curl package.
 Tested on Raspberry Pi and Debian stable distros.
 
 This is composed by 2 files:
-* Config file: */etc/dynip_update.conf*
-* Script file: */usr/local/bin/dynip_update*
+* Config file: `dynip_update.conf.example`
+* Script file: `dynip_update`
 
 
 
 ### What is this repository for? ###
 
 * Update your dynamic DNS provider (InternetBS / NO-IP.com)
-* Version: 2.0
+* Version: 2.1
 
 ### How do I get set up? ###
 
-* Configuration: copy the config file in */etc/* and the script into */usr/local/bin/*
+* Installation:
+  1. `sudo cp dynip_update.conf.example /etc/dynip_update.conf`
+  2. Modify `/etc/dynip_update.conf` accordingly with your parameters
+  3. `sudo cp dynip_update /usr/local/bin/dynip_update`
 * Dependencies: *curl, dig, sendmail*
 
 

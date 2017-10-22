@@ -2,8 +2,8 @@
 # Custom parameters for dynip_update script
 ####################################################################
 
-# Version 2.0
-# Serial 2014050501
+# Version 2.1
+# Serial 201710221505
 
 # Dynamic DNS credentials
 USERNAME="your_username"
@@ -24,6 +24,10 @@ DYNIPPROV="https://dyndns.topdns.com/update" # Internet.bs
 EMAILNOTIFICATION=0
 EMAIL="me@email.com"
 SENDMAIL=/usr/sbin/sendmail
+
+# Lists of servers that are providing 'get ip' service
+GET_IP_SERVERS="ip.tian.it ipecho.net/plain ident.me"
+
 ####################################################################
 
 # Extra confs
