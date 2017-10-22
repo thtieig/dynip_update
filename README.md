@@ -23,9 +23,9 @@ This is composed by 2 files:
 ### How do I get set up? ###
 
 * Installation:
-  *1. `sudo cp dynip_update.conf.example /etc/dynip_update.conf`
-  *2. Modify `/etc/dynip_update.conf` accordingly with your parameters
-  *3. `sudo cp dynip_update /usr/local/bin/dynip_update`
+- 1. `sudo cp dynip_update.conf.example /etc/dynip_update.conf`
+- 2. Modify `/etc/dynip_update.conf` accordingly with your parameters
+- 3. `sudo cp dynip_update /usr/local/bin/dynip_update`
 * Dependencies: *curl, dig, sendmail*
 
 
