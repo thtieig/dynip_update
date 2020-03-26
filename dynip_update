@@ -9,8 +9,8 @@
 ####################################################################
 ####################################################################
 
-# Version 2.1
-# Serial 201710221457
+# Version 3.0
+# Serial 202003261918
 
 # Include custom parameters for this script
 source /etc/dynip_update.conf
@@ -18,10 +18,34 @@ source /etc/dynip_update.conf
 # Previous IP file (needs to be stored in a directory that doesn't
 # get deleted in case of reboot).
 ME=`basename $0`
-P_IP=/root/${ME}_p_ip.txt
+FILESPATH="/root"
+P_IP="$FILESPATH/${ME}_p_ip.txt"
 
 
 ####################################################################
+
+DYNHOSTNAME="$SERVERNAME.$DOMAINNAME"
+
+case $DYNIPPROV in
+	noip)
+		DYNIPURL="https://dynupdate.no-ip.com/nic/update"
+		UPDATETYPE=1
+		;;
+	internetbs)
+		DYNIPURL="https://dyndns.topdns.com/update"
+		UPDATETYPE=1
+		;;
+	cloudflare)
+		CF_ID_FILE="$FILESPATH/${ME}_cloudflare.ids"
+		record_name="$DYNHOSTNAME"
+		zone_name="$DOMAINNAME"
+		UPDATETYPE=2
+		;;
+	*)
+		echo "Dynamic DNS Provider unrecognised. Please check dynip_update.conf file."
+		exit 1
+		;;
+esac
 
 get_ip () {
 # curl randomly one of the services and check that the output is actually an IP
@@ -59,7 +83,7 @@ PREV_IP=`cat $P_IP`
 if [ "$CURR_IP" != "$PREV_IP" ] 
    then 
 	store_ip
-	update_ip
+	update_ip $UPDATETYPE
 	notify "New IP $CURR_IP set for $DYNHOSTNAME - at `date "+%H:%M %d/%m/%Y"` from `hostname`"
 fi
 }
@@ -78,13 +102,49 @@ fi
 }
 
 update_ip () {
+  case $UPDATETYPE in
+	1)
+		update_ip_type1
+		;;
+	2)
+		update_ip_type2
+		;;
+	*)
+		echo "Unknown update type. Aborting."
+		exit 1
+		;;
+  esac
+}
+
+update_ip_type1 () {
 # Curl APIs to update with the new IP. Expecting output 'good'. If not notify.
-RESULT=$($CURL -s -k -u "$USERNAME:$PASS" "$DYNIPPROV?hostname=$DYNHOSTNAME&myip=$CURR_IP")
+RESULT=$($CURL -s -k -u "$USERNAME:$PASS" "$DYNIPURL?hostname=$DYNHOSTNAME&myip=$CURR_IP")
 if [[ `echo "$RESULT" | grep -c "good"` -ne 1 ]]
    then 
 	notify "[WARNING] DNS update result from `hostname` for $DYNHOSTNAME is $RESULT. Investigation needed."
 	exit 1
 fi
+}
+
+update_ip_type2 () {
+if [ -f $CF_ID_FILE ] && [ $(wc -l $CF_ID_FILE | cut -d " " -f 1) == 2 ]; then
+    zone_identifier=$(head -1 $CF_ID_FILE)
+    record_identifier=$(tail -1 $CF_ID_FILE)
+else
+    zone_identifier=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=$zone_name" -H "X-Auth-Email: $USERNAME" -H "X-Auth-Key: $PASS" -H "Content-Type: application/json" | grep -Po '(?<="id":")[^"]*' | head -1 )
+    record_identifier=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records?name=$record_name" -H "X-Auth-Email: $USERNAME" -H "X-Auth-Key: $PASS" -H "Content-Type: application/json"  | grep -Po '(?<="id":")[^"]*')
+    echo "$zone_identifier" > $CF_ID_FILE
+    echo "$record_identifier" >> $CF_ID_FILE
+fi
+
+update=$(curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records/$record_identifier" -H "X-Auth-Email: $USERNAME" -H "X-Auth-Key: $PASS" -H "Content-Type: application/json" --data "{\"id\":\"$zone_identifier\",\"type\":\"A\",\"name\":\"$record_name\",\"content\":\"$CURR_IP\",\"ttl\":$TTL}")
+
+if [[ $update == *"\"success\":false"* ]]; then
+    message="API UPDATE FAILED. DUMPING RESULTS:\n$update"
+    notify "$message"
+    exit 1
+fi
+
 }
 
 store_ip () {
