@@ -2,22 +2,44 @@
 # Custom parameters for dynip_update script
 ####################################################################
 
-# Version 2.1
-# Serial 201710221505
+# Version 3.0
+# Serial 202003261918
 
-# Dynamic DNS credentials
-USERNAME="your_username"
-PASS="your_password"
-DYNHOSTNAME="$USERNAME.domain.me" # Internet.bs
-#DYNHOSTNAME="myhostname.no-ip.com" # NoIP.com
+# ------------------------# 
+# DynIP Provider          #
+# ------------------------# 
+#
+# Choose which Dynamic IP do you want to setup (one only)
+#DYNIPPROV=noip # NoIP.com
+#DYNIPPROV=internetbs # Internet.bs / Internetbs.net
+DYNIPPROV=cloudflare # Cloudflare
 
+# ------------------------# 
+# Dynamic DNS parameters  #
+# ------------------------# 
+# 
+# For NoIP.com and Internet.bs, each DNS record has its own password
+# The USERNAME generally matches with the name of the DNS record that
+# you want to update.
+#
+# USERNAME="myserver"
+# PASS="your_password"
+# SERVERNAME="myserver"
+# DOMAINNAME="mydomain.me"
+#
+# For Cloudflare, the USERNAME is the email used to login and the
+# PASS is the API KEY of the account.
+# CloudFlare can also set the TTL. You can specify a value between 
+# 120 and 2,147,483,647 seconds, or 1 for automatic.
+USERNAME="loginemail@mail.loc"
+PASS="account_api_key"
+SERVERNAME="myserver"
+DOMAINNAME="mydomain.me"
+TTL=1
 
-# DynIP Provider
-# Uncomment just one, accordingly with your Dynamic IP provider
-DYNIPPROV="https://dyndns.topdns.com/update" # Internet.bs
-#DYNIPPROV="https://dynupdate.no-ip.com/nic/update" # NoIP.com
-
-# Email notification setting. 
+# ------------------------#
+# Email notification      # 
+# ------------------------#
 # If set to 1, enables output sent through email notifications.
 # Suggested in case of using cron to execute this script
 # Set to 0 during test to see output in your terminal.
@@ -26,7 +48,7 @@ EMAIL="me@email.com"
 SENDMAIL=/usr/sbin/sendmail
 
 # Lists of servers that are providing 'get ip' service
-GET_IP_SERVERS="ip.tian.it ipecho.net/plain ident.me"
+GET_IP_SERVERS="ip.tian.it ident.me"
 
 ####################################################################
 
