@@ -13,13 +13,12 @@
 # Serial 202003261918
 
 # Include custom parameters for this script
-source dynip_update.conf
-#source /etc/dynip_update.conf
+source /etc/dynip_update.conf
 
 # Previous IP file (needs to be stored in a directory that doesn't
 # get deleted in case of reboot).
 ME=`basename $0`
-FILESPATH="/tmp"
+FILESPATH="/root"
 P_IP="$FILESPATH/${ME}_p_ip.txt"
 
 
