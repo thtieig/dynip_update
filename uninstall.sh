@@ -11,8 +11,8 @@ echo "Press any key to continue"
 
 read voidvar
 
-rm -f /etc/dynip_update.conf*
-rm -f /usr/local/bin/dynip_update
-rm -f /etc/cron.d/dynip_update
+rm -fv /etc/dynip_update.conf*
+rm -fv /usr/local/bin/dynip_update
+rm -fv /etc/cron.d/dynip_update
 
 echo "UNISTALL COMPLETED. Thank you for trying DYNIP_UPDATE."
