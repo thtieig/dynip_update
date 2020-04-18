@@ -62,7 +62,13 @@ SENDMAIL=/usr/sbin/sendmail
 GET_IP_SERVERS="ip.tian.it ident.me"
 
 ####################################################################
-
+#####################  Extra confs  ################################
 # Extra confs
 DIG=/usr/bin/dig
 CURL=/usr/bin/curl
+
+# Previous IP and server's name check files need to be stored in a 
+# directory that doesn't get deleted in case of reboot. /root is 
+# suggested. But you can change it, as long as the files remain.
+FILESPATH="/root"
+####################################################################

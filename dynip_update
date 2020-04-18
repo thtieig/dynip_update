@@ -16,16 +16,17 @@
 CONFIG_FILE='/etc/dynip_update.conf'
 source ${CONFIG_FILE}
 
-# Previous IP file (needs to be stored in a directory that doesn't
-# get deleted in case of reboot).
 ME=`basename $0`
-FILESPATH="/root"
-
 P_IP="${FILESPATH}/${ME}_p_ip.txt"
 SERVERNAME_CHECKFILE="${FILESPATH}/${ME}_servername.chk"
     
-FORCE_UPDATE='false'
 ####################################################################
+
+if [ $1 == '-f' ]; then
+  FORCE_UPDATE='true'
+else
+  FORCE_UPDATE='false'
+fi 
 
 DYNHOSTNAME="${SERVERNAME}.${DOMAINNAME}"
 
