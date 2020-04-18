@@ -9,24 +9,24 @@
 ####################################################################
 ####################################################################
 
-# Version 3.0
-# Serial 202003261918
+# Version 3.1
+# Serial 202000181558
 
 # Include custom parameters for this script
-source /etc/dynip_update.conf
+CONFIG_FILE='/etc/dynip_update.conf'
+source ${CONFIG_FILE}
 
 # Previous IP file (needs to be stored in a directory that doesn't
 # get deleted in case of reboot).
 ME=`basename $0`
 FILESPATH="/root"
-P_IP="$FILESPATH/${ME}_p_ip.txt"
-
+P_IP="${FILESPATH}/${ME}_p_ip.txt"
 
 ####################################################################
 
-DYNHOSTNAME="$SERVERNAME.$DOMAINNAME"
+DYNHOSTNAME="${SERVERNAME}.${DOMAINNAME}"
 
-case $DYNIPPROV in
+case ${DYNIPPROV} in
 	noip)
 		DYNIPURL="https://dynupdate.no-ip.com/nic/update"
 		UPDATETYPE=1
@@ -36,9 +36,7 @@ case $DYNIPPROV in
 		UPDATETYPE=1
 		;;
 	cloudflare)
-		CF_ID_FILE="$FILESPATH/${ME}_cloudflare.ids"
-		record_name="$DYNHOSTNAME"
-		zone_name="$DOMAINNAME"
+    CF_IDS_FILE="$FILESPATH/${ME}_cloudflare.ids"
 		UPDATETYPE=2
 		;;
 	*)
@@ -52,27 +50,27 @@ get_ip () {
 # store this into CURR_IP variable and increment TRIES counter variable
 declare -a SERVICES=($GET_IP_SERVERS)
 SRV=${SERVICES[$((  RANDOM % ${#SERVICES[@]}  ))]}
-CURR_IP="`$CURL -s --retry 3 --retry-delay 5 -m 15 $SRV | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'`"
+CURR_IP="`${CURL} -s --retry 3 --retry-delay 5 -m 15 ${SRV} | grep -Eo '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'`"
 (( TRIES++ ))
 }
 
 check_ip () {
 # Check if CURR_IP is empty and retry for a number of times stored into MAXTRIES
-if [ -z "$CURR_IP" ]
-  then retry $MAXTRIES
+if [ -z "${CURR_IP}" ]
+  then retry ${MAXTRIES}
 fi
 }
 
 retry () {
 # If you've reached already MAXTRIES, notify. 
 # Otherwise retry to get the IP, log it, increase the counter and check_ip again
-if [ $TRIES -eq $1 ]
+if [ ${TRIES} -eq $1 ]
   then 
-	notify "Unable to get current IP for `hostname` - $DYNHOSTNAME after $1 attempts reached -> Aborting" ; exit 1
+	notify "Unable to get current IP for `hostname` - ${DYNHOSTNAME} after $1 attempts reached -> Aborting" ; exit 1
   else
 	get_ip
 	# Just log the retries (no notifications)
-	logger "${BASH_SOURCE[0]} PID $$ is retrying to get the IP using $SRV: attempt #$TRIES"
+	logger "${BASH_SOURCE[0]} PID $$ is retrying to get the IP using ${SRV}: attempt #${TRIES}"
 	check_ip
 fi
 }
@@ -80,20 +78,20 @@ fi
 is_update_required () {
 # In case of IP mismatch between current and previous, update and notify
 PREV_IP=`cat $P_IP`
-if [ "$CURR_IP" != "$PREV_IP" ] 
+if [ "${CURR_IP}" != "${PREV_IP}" ] 
    then 
 	store_ip
-	update_ip $UPDATETYPE
-	notify "New IP $CURR_IP set for $DYNHOSTNAME - at `date "+%H:%M %d/%m/%Y"` from `hostname`"
+	update_ip ${UPDATETYPE}
+	notify "New IP ${CURR_IP} set for ${DYNHOSTNAME} - at `date "+%H:%M %d/%m/%Y"` from `hostname`"
 fi
 }
 
 notify () {
 # If email notification is set to 1 (enabled) notify via mail and log
 # Otherwiser just log (print on screen for debugging)
-if [ $EMAILNOTIFICATION -eq 1 ]
+if [ ${EMAILNOTIFICATION} -eq 1 ]
    then
-	echo -e "Subject:$1\n" | $SENDMAIL $EMAIL
+	echo -e "Subject:$1\n" | ${SENDMAIL} ${EMAIL}
 	logger "${BASH_SOURCE[0]} PID $$ - $1"
    else
 	#echo -e "$1\n"  # Enable for debugging
@@ -102,7 +100,7 @@ fi
 }
 
 update_ip () {
-  case $UPDATETYPE in
+  case ${UPDATETYPE} in
 	1)
 		update_ip_type1
 		;;
@@ -118,26 +116,22 @@ update_ip () {
 
 update_ip_type1 () {
 # Curl APIs to update with the new IP. Expecting output 'good'. If not notify.
-RESULT=$($CURL -s -k -u "$USERNAME:$PASS" "$DYNIPURL?hostname=$DYNHOSTNAME&myip=$CURR_IP")
-if [[ `echo "$RESULT" | grep -c "good"` -ne 1 ]]
+RESULT=$(${CURL} -s -k -u "${USERNAME}:${PASS}" "${DYNIPURL}?hostname=${DYNHOSTNAME}&myip=${CURR_IP}")
+if [[ `echo "${RESULT}" | grep -c "good"` -ne 1 ]]
    then 
-	notify "[WARNING] DNS update result from `hostname` for $DYNHOSTNAME is $RESULT. Investigation needed."
+	notify "[WARNING] DNS update result from `hostname` for ${DYNHOSTNAME} is ${RESULT}. Investigation needed."
 	exit 1
 fi
 }
 
 update_ip_type2 () {
-if [ -f $CF_ID_FILE ] && [ $(wc -l $CF_ID_FILE | cut -d " " -f 1) == 2 ]; then
-    zone_identifier=$(head -1 $CF_ID_FILE)
-    record_identifier=$(tail -1 $CF_ID_FILE)
-else
-    zone_identifier=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=$zone_name" -H "X-Auth-Email: $USERNAME" -H "X-Auth-Key: $PASS" -H "Content-Type: application/json" | grep -Po '(?<="id":")[^"]*' | head -1 )
-    record_identifier=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records?name=$record_name" -H "X-Auth-Email: $USERNAME" -H "X-Auth-Key: $PASS" -H "Content-Type: application/json"  | grep -Po '(?<="id":")[^"]*')
-    echo "$zone_identifier" > $CF_ID_FILE
-    echo "$record_identifier" >> $CF_ID_FILE
+if [ -z ${AUTO_RECORD_IDENTIFIER} ]; then
+    AUTO_RECORD_IDENTIFIER="$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones/${ZONEID}/dns_records?name=${DYNHOSTNAME}" -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json"  | grep -Po '(?<="id":")[^"]*')"
+    echo "${DYNHOSTNAME} DNS record identifier is ${AUTO_RECORD_IDENTIFIER}. Updating ${CONFIG_FILE}"
+    sed -i "s/^AUTO_RECORD_IDENTIFIER=.*$/AUTO_RECORD_IDENTIFIER='${AUTO_RECORD_IDENTIFIER}'/g" ${CONFIG_FILE}
 fi
 
-update=$(curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/$zone_identifier/dns_records/$record_identifier" -H "X-Auth-Email: $USERNAME" -H "X-Auth-Key: $PASS" -H "Content-Type: application/json" --data "{\"id\":\"$zone_identifier\",\"type\":\"A\",\"name\":\"$record_name\",\"content\":\"$CURR_IP\",\"ttl\":$TTL}")
+update=$(curl -s -X PUT "https://api.cloudflare.com/client/v4/zones/${ZONEID}/dns_records/${AUTO_RECORD_IDENTIFIER}" -H "Authorization: Bearer ${TOKEN}" -H "Content-Type: application/json" --data "{\"id\":\"${ZONEID}\",\"type\":\"A\",\"name\":\"${DYNHOSTNAME}\",\"content\":\"${CURR_IP}\",\"ttl\":${TTL}}")
 
 if [[ $update == *"\"success\":false"* ]]; then
     message="API UPDATE FAILED. DUMPING RESULTS:\n$update"
@@ -148,7 +142,7 @@ fi
 }
 
 store_ip () {
-echo "$CURR_IP" > $P_IP
+echo "${CURR_IP}" > ${P_IP}
 }
 
 

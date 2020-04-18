@@ -2,8 +2,8 @@
 # Custom parameters for dynip_update script
 ####################################################################
 
-# Version 3.0
-# Serial 202003261918
+# Version 3.1
+# Serial 202000181558
 
 # ------------------------# 
 # DynIP Provider          #
@@ -15,7 +15,7 @@
 DYNIPPROV=cloudflare # Cloudflare
 
 # ------------------------# 
-# Dynamic DNS parameters  #
+# NoIP.com | Internet.bs  #
 # ------------------------# 
 # 
 # For NoIP.com and Internet.bs, each DNS record has its own password
@@ -26,16 +26,29 @@ DYNIPPROV=cloudflare # Cloudflare
 # PASS="your_password"
 # SERVERNAME="myserver"
 # DOMAINNAME="mydomain.me"
-#
-# For Cloudflare, the USERNAME is the email used to login and the
-# PASS is the API KEY of the account.
+
+
+# ------------------------# 
+#       Cloudflare        #
+# ------------------------# 
+# For Cloudflare, you need the ZONE IDENTIFIER and a valid TOKEN.
+# The Zone Identifier is on the bottom right of the Overview page.
+# For the Token, I do recommend to generate a specific one:
+# Overview > Get API Token > Create Token and use the 'Edit DNS Zone'
+# template. Authorise ONLY the zone you'd like this scrip to 'Edit'.
 # CloudFlare can also set the TTL. You can specify a value between 
 # 120 and 2,147,483,647 seconds, or 1 for automatic.
-USERNAME="loginemail@mail.loc"
-PASS="account_api_key"
-SERVERNAME="myserver"
+ZONEID='<DNS Zone ID>'
+TOKEN='<TOKEN>'
+SERVERNAME="myserver" #Reset AUTO_RECORD_IDENTIFIER if you modify this variable
 DOMAINNAME="mydomain.me"
 TTL=1
+
+# AUTO_RECORD_IDENTIFIER gets automatically populated
+# at the first run of the script.
+# Reset this variable to empty => AUTO_RECORD_IDENTIFIER=
+# ONLY IF you change the SERVERNAME.
+AUTO_RECORD_IDENTIFIER=
 
 # ------------------------#
 # Email notification      # 
