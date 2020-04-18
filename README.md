@@ -19,18 +19,23 @@ This script is composed by 3 files:
 ### What is this repository for? ###
 
 * Update your dynamic DNS provider (InternetBS / NO-IP.com / Cloudflare)
-* Version: 3.2
+* Version: 3.2.2
 
 ### How do I get set it up? ###
 
-1. Installation:
+1. Automatic installation/Uninstall:
+Simply run `sudo install.sh` to install. The install script will backup any previous config files.
+To uninstall: `sudo uninstall.sh`. The uninstall will remove ANY file (current and previous) related to this script.
+
+2. Manual Installation:
 - `sudo cp dynip_update.conf.example /etc/dynip_update.conf`
 - Modify `/etc/dynip_update.conf` accordingly with your parameters. Read carefully the comments.
 - `sudo chmod 600 /etc/dynip_update.conf`
 - `sudo cp dynip_update /usr/local/bin/dynip_update`
-- `sudo cp cron_dynip_update /etc/cron.d/dynip_update` if you'd like to run this in a cron. You can change the frequency (default every 5 minutes), editing this file.
+- `sudo cp cron_dynip_update /etc/cron.d/dynip_update` 
+- Edit `/etc/cron.d/dynip_update` if you'd like to run this script automatically within a cron every 5 minuts. By default is DISABLED.
 
-2. Dependencies: *curl, dig, sendmail*
+3. Dependencies: *curl, dig, sendmail*
 
 #### NOTE
 Once set it up, you can run the script manually, using the flag `-f`, to force the update.
