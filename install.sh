@@ -25,12 +25,10 @@ chmod +x /usr/local/bin/dynip_update
 cp cron_dynip_update /etc/cron.d/dynip_update
 
 echo "Setup COMPLETED"
-echo 
-"WHAT IS NEXT?
+echo "
+WHAT IS NEXT?
 
 Modify /etc/dynip_update.conf accordingly with your parameters. 
 Read carefully the comments.
 
-Enable the CRON, editing /etc/cron.d/dynip_update
-
-"
+Enable the CRON, editing /etc/cron.d/dynip_update"
