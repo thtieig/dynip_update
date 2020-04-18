@@ -9,8 +9,8 @@
 ####################################################################
 ####################################################################
 
-# Version 3.2
-# Serial 202004181751
+# Version 3.2.1
+# Serial 2020041817511843
 
 # Include custom parameters for this script
 CONFIG_FILE='/etc/dynip_update.conf'
@@ -22,7 +22,7 @@ SERVERNAME_CHECKFILE="${FILESPATH}/${ME}_servername.chk"
     
 ####################################################################
 
-if [ $1 == '-f' ]; then
+if [ "$1" == '-f' ]; then
   FORCE_UPDATE='true'
 else
   FORCE_UPDATE='false'
