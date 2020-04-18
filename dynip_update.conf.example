@@ -2,8 +2,8 @@
 # Custom parameters for dynip_update script
 ####################################################################
 
-# Version 3.1
-# Serial 202000181558
+# Version 3.2
+# Serial 202004181751
 
 # ------------------------# 
 # DynIP Provider          #
@@ -40,14 +40,12 @@ DYNIPPROV=cloudflare # Cloudflare
 # 120 and 2,147,483,647 seconds, or 1 for automatic.
 ZONEID='<DNS Zone ID>'
 TOKEN='<TOKEN>'
-SERVERNAME="myserver" #Reset AUTO_RECORD_IDENTIFIER if you modify this variable
+SERVERNAME="myserver"
 DOMAINNAME="mydomain.me"
 TTL=1
 
-# AUTO_RECORD_IDENTIFIER gets automatically populated
-# at the first run of the script.
-# Reset this variable to empty => AUTO_RECORD_IDENTIFIER=
-# ONLY IF you change the SERVERNAME.
+# AUTO_RECORD_IDENTIFIER gets automatically populated: 
+# >> DO NOT MANUALLY MODIFY IT <<
 AUTO_RECORD_IDENTIFIER=
 
 # ------------------------#

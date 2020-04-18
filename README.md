@@ -5,6 +5,7 @@ You can run it manually or put it within a cron to run every few minutes.
 It sends the update ONLY if the IP has changed. So you will avoid any "abuse" error, in case of too many attempts to update the IP.
 
 This script currently works with Internet.bs, NO-IP.com and Cloudflare services.
+The sample conf file uses Cloudflare as default provider.
 
 It requires `curl` package.
 Tested on Raspberry Pi raspbian, Ubuntu 18.04 and Debian 9 distros.
