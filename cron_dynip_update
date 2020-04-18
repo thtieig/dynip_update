@@ -1,2 +1,2 @@
 # Run dynip_update script every 5 minutes
-*/5 * * * * root /usr/local/bin/dynip_update
+#*/5 * * * * root /usr/local/bin/dynip_update
