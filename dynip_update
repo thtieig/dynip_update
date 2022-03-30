@@ -3,14 +3,14 @@
 ####################################################################
 # Scripts that updates dynamic DNS servers using HTTPS via CURL.
 # Curl is a required package. Please make sure it's installed!
-# Currently supports Internet.bs and NO-IP.com providers.
+# Currently supports Internet.bs, NO-IP.com and Cloudflare providers.
 # Custom parameters are set in /etc/dynip_update.conf
 # PLEASE UPDATE THAT FILE - DO NOT CHANGE THIS SCRIPT.
 ####################################################################
 ####################################################################
 
-# Version 3.2.1
-# Serial 2020041817511843
+# Version 3.2.2
+# Serial 2022033011270322
 
 # Include custom parameters for this script
 CONFIG_FILE='/etc/dynip_update.conf'
@@ -70,7 +70,7 @@ retry () {
   # Otherwise retry to get the IP, log it, increase the counter and check_ip again
   if [ ${TRIES} -eq $1 ]
     then 
-    notify "Unable to get current IP for `hostname` - ${DYNHOSTNAME} after $1 attempts reached -> Aborting" ; exit 1
+    notify "Unable to get current IP for `hostname` - ${DYNHOSTNAME} using ${SRV} after $1 attempts reached -> Aborting" ; exit 1
     else
     get_ip
     # Just log the retries (no notifications)
