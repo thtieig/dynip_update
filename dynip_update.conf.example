@@ -2,8 +2,8 @@
 # Custom parameters for dynip_update script
 ####################################################################
 
-# Version 3.2
-# Serial 202004181751
+# Version 3.3
+# Serial 2022050911390001
 
 # ------------------------# 
 # DynIP Provider          #
@@ -56,7 +56,16 @@ AUTO_RECORD_IDENTIFIER=
 # Set to 0 during test to see output in your terminal.
 EMAILNOTIFICATION=0
 EMAIL="me@email.com"
-SENDMAIL=/usr/sbin/sendmail
+SENDMAIL=/usr/bin/mail
+
+# Text email clients have different ways to send emails
+#
+# 1) 'mail' command needs -s flag to specify the subject (e.g. bsd-mailx)
+# set: SEND_EMAIL_FORMAT=1
+#
+# 2) 'mail' command needs ALL headers within the body data, including the To field (e.g. ssmtp)
+# set: SEND_EMAIL_FORMAT=2
+SEND_EMAIL_FORMAT=1
 
 # Lists of servers that are providing 'get ip' service
 GET_IP_SERVERS="ip.tian.it ident.me"
