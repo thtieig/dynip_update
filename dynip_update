@@ -9,8 +9,8 @@
 ####################################################################
 ####################################################################
 
-# Version 3.2.2
-# Serial 2022033011270322
+# Version 3.3
+# Serial 202205091058001
 
 # Include custom parameters for this script
 CONFIG_FILE='/etc/dynip_update.conf'
@@ -107,12 +107,31 @@ if ${FORCE_UPDATE} || [ "${CURR_IP}" != "${PREV_IP}" ]; then
 fi
 }
 
+
+send_email_notification () {
+# Text email clients have different ways to send emails
+# Some needs the -s flag to specify the subject (e.g. bsd-mailx)
+# others need all within the body data, including the To field (e.g. ssmtp)
+# This functions send emails based on the selection in the config file
+# TYPE1 or TYPE2
+if [ ${SEND_EMAIL_FORMAT} -eq 1 ]
+   then
+	 echo "$1" | ${SENDMAIL} -s "$1" ${EMAIL}
+elif [ ${SEND_EMAIL_FORMAT} -eq 2 ]
+   then 
+	echo -e "To:${EMAIL}\nSubject:$1\n\n$1\n" | ${SENDMAIL} ${EMAIL}
+else
+	logger "ERROR: email notification format unknown. Check config file"
+fi
+}
+
+
 notify () {
 # If email notification is set to 1 (enabled) notify via mail and log
 # Otherwiser just log (print on screen for debugging)
 if [ ${EMAILNOTIFICATION} -eq 1 ]
    then
-	echo -e "Subject:$1\n" | ${SENDMAIL} ${EMAIL}
+	send_email_notification "$1"	
 	logger "${BASH_SOURCE[0]} PID $$ - $1"
    else
 	#echo -e "$1\n"  # Enable for debugging
